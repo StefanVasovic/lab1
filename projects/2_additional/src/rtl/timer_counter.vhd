@@ -40,5 +40,41 @@ begin
 
 -- sistem za brojane sekundi,minuta i sata kao sistem za generisanje izlaza u odnosu na pritisnuti taster
 -- ako nije pritisnut nijedan taster onda se prikazuju sekunde
-
+	process (clk_i, rst_i,counter_value_s) begin
+		if (rst_i = '1') then
+			counter_value_s <= (others => '0');
+		elsif (clk_i'event and clk_i = '1') then
+			if (cnt_rst_i = '1') then
+				counter_value_s <= (others => '0');
+			elsif (cnt_en_i = '1') then
+				if (one_sec_i = '1') then
+					if (counter_value_s = "00111100") then
+						if (counter_for_min_s = "00111100") then
+							counter_for_h_s <= counter_for_h_s + 1;
+							counter_for_min_s <= (others => '0');
+						else
+							counter_for_min_s <= counter_for_min_s + 1;
+							counter_value_s <= (others => '0');
+						end if;
+					else
+						counter_value_s <= counter_value_s + 1;
+					end if;
+				end if;
+			else
+				counter_value_s <= counter_value_s;
+			end if;
+		else
+			counter_value_s <= counter_value_s;
+		end if;
+	end process;
+	
+	process (button_hour_i, button_min_i,counter_value_s,counter_for_min_s, counter_for_h_s) begin
+		if (button_hour_i = '1') then
+			led_o <= counter_for_h_s;
+		elsif (button_min_i = '1') then
+			led_o <= counter_for_min_s;
+		else
+			led_o <= counter_value_s;
+		end if;
+	end process;
 END rtl;
